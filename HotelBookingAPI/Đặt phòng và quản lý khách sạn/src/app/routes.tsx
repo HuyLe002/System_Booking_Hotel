@@ -24,7 +24,7 @@ import { ExperiencePage, NotFoundPage } from "../pages/StaticPage";
 import { DashboardLayout } from "../layouts/DashboardLayout";
 import { PublicLayout } from "../layouts/PublicLayout";
 
-export const router = createBrowserRouter([
+const routes = [
   {
     Component: PublicLayout,
     children: [
@@ -91,4 +91,6 @@ export const router = createBrowserRouter([
       },
     ],
   },
-]);
+];
+
+export const router = createBrowserRouter(routes, { basename: import.meta.env.BASE_URL });

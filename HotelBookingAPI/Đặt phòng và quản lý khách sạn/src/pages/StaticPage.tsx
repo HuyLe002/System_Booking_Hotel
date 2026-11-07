@@ -1,4 +1,5 @@
 import { HeartHandshake, Leaf, ShieldCheck, Sparkles } from "lucide-react";
+import { Link } from "react-router";
 
 export function ExperiencePage() {
   return (
@@ -53,9 +54,9 @@ export function NotFoundPage() {
         <h1 className="mt-3 font-display text-3xl font-semibold text-navy">
           Trang này không tồn tại
         </h1>
-        <a href="/" className="mt-6 inline-block font-semibold text-gold-dark">
+        <Link to="/" className="mt-6 inline-block font-semibold text-gold-dark">
           Về trang chủ →
-        </a>
+        </Link>
       </div>
     </div>
   );

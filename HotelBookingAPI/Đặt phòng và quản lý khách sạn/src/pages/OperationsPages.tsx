@@ -827,12 +827,12 @@ export function StaffCreateBookingPage() {
             Mở công cụ tìm phòng công khai trong tab mới, sau đó dùng mã phòng phù hợp để hoàn tất
             booking.
           </p>
-          <a href="/phong" target="_blank" rel="noreferrer">
+          <Link to="/phong" target="_blank" rel="noreferrer">
             <Button variant="secondary" className="mt-5 w-full">
               <Search size={17} />
               Tìm phòng trống
             </Button>
-          </a>
+          </Link>
         </aside>
       </div>
     </div>
