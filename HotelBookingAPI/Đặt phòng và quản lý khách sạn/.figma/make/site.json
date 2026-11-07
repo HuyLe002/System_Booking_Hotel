@@ -1,0 +1,10 @@
+{
+  "description": "Hệ thống đặt phòng khách sạn và quản lý vận hành, giúp khách đặt phòng và theo dõi thanh toán, đồng thời hỗ trợ nhân viên xử lý booking và quản trị.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

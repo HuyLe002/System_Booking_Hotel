@@ -1,0 +1,52 @@
+@HotelBookingAPI_HostAddress = http://localhost:5233
+@BookingId = 1
+@PaymentClaimId = 1
+@Token = thay-bang-access-token
+
+### Thu ngân/Admin xem hàng đợi các khoản khách báo đã trả, cũ nhất trước
+GET {{HotelBookingAPI_HostAddress}}/api/PaymentClaims/pending?page=1&pageSize=10
+Accept: application/json
+Authorization: Bearer {{Token}}
+
+###
+### Tìm phòng trống và xem giá phòng theo từng đêm cho khoảng ngày
+GET {{HotelBookingAPI_HostAddress}}/api/Bookings/available-rooms?checkIn=2026-11-15&checkOut=2026-11-17
+Accept: application/json
+
+###
+### Xem tổng giá đã chốt, số dư và trạng thái các yêu cầu thanh toán
+GET {{HotelBookingAPI_HostAddress}}/api/Bookings/{{BookingId}}/payments
+Accept: application/json
+Authorization: Bearer {{Token}}
+
+###
+### Khách xác nhận đã thanh toán; yêu cầu sẽ ở trạng thái Pending đến khi thu ngân đối soát
+POST {{HotelBookingAPI_HostAddress}}/api/Bookings/{{BookingId}}/payment-claims
+Content-Type: application/json
+Authorization: Bearer {{Token}}
+
+{
+  "amount": 100000,
+  "method": "BankTransfer",
+  "note": "Mã giao dịch chuyển khoản"
+}
+
+###
+### Thu ngân chỉ xác nhận sau khi đã kiểm tra và nhận được tiền thực tế
+POST {{HotelBookingAPI_HostAddress}}/api/Bookings/{{BookingId}}/payment-claims/{{PaymentClaimId}}/confirm
+Content-Type: application/json
+Authorization: Bearer {{Token}}
+
+{
+  "note": "Đã đối soát giao dịch"
+}
+
+###
+### Thu ngân từ chối yêu cầu khi không tìm thấy khoản tiền, cần nêu lý do
+POST {{HotelBookingAPI_HostAddress}}/api/Bookings/{{BookingId}}/payment-claims/{{PaymentClaimId}}/reject
+Content-Type: application/json
+Authorization: Bearer {{Token}}
+
+{
+  "note": "Không tìm thấy giao dịch tương ứng"
+}
