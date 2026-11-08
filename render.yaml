@@ -3,7 +3,7 @@ services:
     name: hotel-booking-api
     runtime: docker
     plan: free
-    dockerContext: ./HotelBookingAPI
+    dockerContext: .
     dockerfilePath: ./HotelBookingAPI/Dockerfile
     envVars:
       - key: ASPNETCORE_ENVIRONMENT
