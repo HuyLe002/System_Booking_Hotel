@@ -30,6 +30,36 @@ Because the previous signing key and database connection string were stored in
 shared settings, rotate the SQL Server credential and use a newly generated JWT
 key before deployment. Rotating the JWT key invalidates existing access tokens.
 
+## Deploy to Render (free web service)
+
+The repository includes a Render Blueprint at `../render.yaml` and a Dockerfile
+for the API. In Render, create a new Blueprint from this repository and select
+the free plan. The free web service may spin down while idle, so its first
+request after inactivity can take longer.
+
+The API requires SQL Server; Render's free web-service plan does not include a
+SQL Server database. Provide a reachable SQL Server connection string in the
+Blueprint prompt or the service's environment settings as
+`ConnectionStrings__DefaultConnection`. Apply the EF Core migrations to that
+database before the first deployment; the app does not apply migrations
+automatically. For example, from this directory, set the connection string in
+your local PowerShell session and run:
+
+```powershell
+$env:ConnectionStrings__DefaultConnection = "<sql-server-connection-string>"
+dotnet ef database update --project .\HotelBookingAPI\HotelBookingAPI.csproj
+```
+
+The EF Core CLI should match the application's EF Core 8 version. If needed,
+install it with `dotnet tool install --global dotnet-ef --version 8.0.10`.
+
+Set the prompted `Jwt__Key` to a new random secret of at least 32 UTF-8 bytes.
+For a new database, also set `BootstrapAdmin__Username` (3-50 characters) and
+`BootstrapAdmin__Password` (12-100 characters); these are only needed when the
+database has no Admin user. Set `Cors__AllowedOrigins__0` to the exact HTTPS
+origin of the deployed frontend. Keep all secrets in Render's environment
+settings, never in `render.yaml` or source control.
+
 ## Payment confirmation flow
 
 1. Search for rooms and get nightly prices with
