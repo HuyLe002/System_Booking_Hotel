@@ -14,7 +14,7 @@ public sealed class HotelDbContextFactory : IDesignTimeDbContextFactory<HotelDbC
                 "Set ConnectionStrings__DefaultConnection before running EF Core tools.");
 
         var options = new DbContextOptionsBuilder<HotelDbContext>()
-            .UseSqlServer(connectionString)
+            .UseNpgsql(connectionString)
             .Options;
 
         return new HotelDbContext(options);

@@ -1,5 +1,3 @@
-﻿using System.ComponentModel.DataAnnotations;
-
 namespace HotelBookingAPI.Models;
 
 public class Booking
@@ -22,8 +20,7 @@ public class Booking
     public DateTime? CheckedInAt { get; set; }
     public DateTime? CheckedOutAt { get; set; }
 
-    // Token chống ghi đè đồng thời: SQL Server tự đổi giá trị mỗi lần dòng bị UPDATE
-    [Timestamp]
+    // Token chống ghi đè đồng thời, được ứng dụng đổi mỗi lần cập nhật
     public byte[] RowVersion { get; set; } = Array.Empty<byte>();
 
     public Customer? Customer { get; set; }

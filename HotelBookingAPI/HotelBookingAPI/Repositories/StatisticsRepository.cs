@@ -81,7 +81,7 @@ public class StatisticsRepository : IStatisticsRepository
                 g.Key.RoomNumber,
                 g.Key.RoomTypeName,
                 TotalBookings = g.Count(),
-                TotalNights = g.Sum(b => EF.Functions.DateDiffDay(b.CheckInDate, b.CheckOutDate)),
+                TotalNights = g.Sum(b => (int)(b.CheckOutDate - b.CheckInDate).TotalDays),
                 Revenue = g.Sum(b => b.TotalPrice)
             })
             .OrderByDescending(x => x.TotalBookings)

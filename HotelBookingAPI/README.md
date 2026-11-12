@@ -2,11 +2,11 @@
 
 ## Local setup
 
-The API requires SQL Server and a JWT signing key. Keep credentials out of
+The API requires PostgreSQL and a JWT signing key. Keep credentials out of
 `appsettings.json`; for local development, use .NET user-secrets:
 
 ```powershell
-dotnet user-secrets set "ConnectionStrings:DefaultConnection" "<sql-server-connection-string>" --project .\HotelBookingAPI\HotelBookingAPI.csproj
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "<postgresql-connection-string>" --project .\HotelBookingAPI\HotelBookingAPI.csproj
 dotnet user-secrets set "Jwt:Key" "<random-secret-at-least-32-bytes>" --project .\HotelBookingAPI\HotelBookingAPI.csproj
 ```
 
@@ -15,6 +15,9 @@ manager or environment variables:
 
 - `ConnectionStrings__DefaultConnection`
 - `Jwt__Key`
+
+The connection string must be an Npgsql connection string, for example:
+`Host=db.example.supabase.co;Port=5432;Database=postgres;Username=postgres;Password=<password>;SSL Mode=Require`.
 
 `Jwt:Issuer` and `Jwt:Audience` are non-secret settings in `appsettings.json`.
 For a frontend hosted on a different origin, configure its exact origin(s) with
@@ -26,9 +29,8 @@ If the database has no Admin user, configure a one-time bootstrap account using
 provider. The username must be 3-50 characters and the password 12-100
 characters. The API does not create an account with a built-in password.
 
-Because the previous signing key and database connection string were stored in
-shared settings, rotate the SQL Server credential and use a newly generated JWT
-key before deployment. Rotating the JWT key invalidates existing access tokens.
+Use a new database password and a newly generated JWT key for deployment.
+Rotating the JWT key invalidates existing access tokens.
 
 ## Deploy to Render (free web service)
 
@@ -37,21 +39,29 @@ for the API. In Render, create a new Blueprint from this repository and select
 the free plan. The free web service may spin down while idle, so its first
 request after inactivity can take longer.
 
-The API requires SQL Server; Render's free web-service plan does not include a
-SQL Server database. Provide a reachable SQL Server connection string in the
+The API now uses PostgreSQL. Create a Supabase project and provide its
+PostgreSQL connection string in the
 Blueprint prompt or the service's environment settings as
 `ConnectionStrings__DefaultConnection`. Apply the EF Core migrations to that
 database before the first deployment; the app does not apply migrations
-automatically. For example, from this directory, set the connection string in
-your local PowerShell session and run:
+automatically. In Supabase, select **Connect**, choose the **.NET** connection
+string, and use the **Session pooler** if the direct database host is not
+reachable over IPv4. Do not use the Supabase API URL or anon key as the
+database connection string. The old SQL Server database is not copied; the
+PostgreSQL database starts with the seed data defined in the application.
+For example, from this directory, set the connection string in your local
+PowerShell session and run:
 
 ```powershell
-$env:ConnectionStrings__DefaultConnection = "<sql-server-connection-string>"
+$env:ConnectionStrings__DefaultConnection = "<supabase-postgresql-connection-string>"
 dotnet ef database update --project .\HotelBookingAPI\HotelBookingAPI.csproj
 ```
 
-The EF Core CLI should match the application's EF Core 8 version. If needed,
-install it with `dotnet tool install --global dotnet-ef --version 8.0.10`.
+Use EF Core CLI version 8.0.10. If needed, install it with
+`dotnet tool install --global dotnet-ef --version 8.0.10`.
+The existing SQL Server migrations are retained as source history but excluded
+from the PostgreSQL build; the new Supabase database starts empty and does not
+copy data from the local SQL Server database.
 
 Set the prompted `Jwt__Key` to a new random secret of at least 32 UTF-8 bytes.
 For a new database, also set `BootstrapAdmin__Username` (3-50 characters) and
@@ -59,6 +69,13 @@ For a new database, also set `BootstrapAdmin__Username` (3-50 characters) and
 database has no Admin user. Set `Cors__AllowedOrigins__0` to the exact HTTPS
 origin of the deployed frontend. Keep all secrets in Render's environment
 settings, never in `render.yaml` or source control.
+
+For the GitHub Pages frontend deployment, add the repository Actions variable
+`VITE_API_BASE_URL` with the deployed API origin (for example,
+`https://hotel-booking-api.onrender.com`). Set it under **Settings → Secrets and
+variables → Actions → Variables**. The deployment workflow fails if this
+variable is missing so it cannot publish a frontend whose API requests point
+back to GitHub Pages.
 
 ## Payment confirmation flow
 

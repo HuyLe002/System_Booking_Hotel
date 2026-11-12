@@ -1,5 +1,6 @@
 ﻿using HotelBookingAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace HotelBookingAPI.Data;
 
@@ -25,6 +26,31 @@ public class HotelDbContext : DbContext
     public DbSet<PaymentClaim> PaymentClaims => Set<PaymentClaim>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
+    public override int SaveChanges()
+    {
+        RefreshConcurrencyTokens();
+        return base.SaveChanges();
+    }
+
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        RefreshConcurrencyTokens();
+        return base.SaveChangesAsync(cancellationToken);
+    }
+
+    private void RefreshConcurrencyTokens()
+    {
+        foreach (var entry in ChangeTracker.Entries()
+                     .Where(entry => (entry.Entity is Booking or Coupon) &&
+                                     (entry.State is EntityState.Added or EntityState.Modified)))
+        {
+            if (entry.Entity is Booking booking)
+                booking.RowVersion = Guid.NewGuid().ToByteArray();
+            else if (entry.Entity is Coupon coupon)
+                coupon.RowVersion = Guid.NewGuid().ToByteArray();
+        }
+    }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -36,12 +62,12 @@ public class HotelDbContext : DbContext
         modelBuilder.Entity<Room>()
             .HasIndex(x => x.RoomNumber)
             .IsUnique()
-            .HasFilter("[IsDeleted] = 0");
+            .HasFilter("\"IsDeleted\" = FALSE");
 
         modelBuilder.Entity<Customer>()
             .HasIndex(x => x.Email)
             .IsUnique()
-            .HasFilter("[IsDeleted] = 0");
+            .HasFilter("\"IsDeleted\" = FALSE");
 
         modelBuilder.Entity<User>()
             .HasIndex(x => x.Username).IsUnique();
@@ -116,7 +142,7 @@ public class HotelDbContext : DbContext
             e.Property(x => x.Value).HasPrecision(18, 2);
             e.Property(x => x.MaxDiscount).HasPrecision(18, 2);
             e.Property(x => x.MinBookingAmount).HasPrecision(18, 2);
-            e.Property(x => x.RowVersion).IsRowVersion();
+            e.Property(x => x.RowVersion).IsConcurrencyToken().ValueGeneratedNever();
             e.HasIndex(x => x.Code).IsUnique();
         });
 
@@ -239,5 +265,17 @@ public class HotelDbContext : DbContext
             new ExtraService { Id = 2, Name = "Đưa đón sân bay", Price = 250000, Unit = "lượt", IsActive = true },
             new ExtraService { Id = 3, Name = "Giặt ủi", Price = 30000, Unit = "kg", IsActive = true }
         );
+
+        var dateTimeConverter = new ValueConverter<DateTime, DateTime>(
+            value => DateTime.SpecifyKind(value, DateTimeKind.Unspecified),
+            value => DateTime.SpecifyKind(value, DateTimeKind.Unspecified));
+
+        foreach (var property in modelBuilder.Model.GetEntityTypes()
+                     .SelectMany(entity => entity.GetProperties())
+                     .Where(property => (Nullable.GetUnderlyingType(property.ClrType) ?? property.ClrType) == typeof(DateTime)))
+        {
+            property.SetColumnType("timestamp without time zone");
+            property.SetValueConverter(dateTimeConverter);
+        }
     }
 }

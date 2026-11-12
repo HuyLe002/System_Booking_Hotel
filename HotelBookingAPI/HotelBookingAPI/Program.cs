@@ -46,7 +46,7 @@ if (string.IsNullOrWhiteSpace(jwtIssuer) || string.IsNullOrWhiteSpace(jwtAudienc
 
 // DbContext
 builder.Services.AddDbContext<HotelDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseNpgsql(connectionString));
 
 // Dependency Injection: interface -> lớp cài đặt
 builder.Services.AddScoped<IRoomTypeRepository, RoomTypeRepository>();

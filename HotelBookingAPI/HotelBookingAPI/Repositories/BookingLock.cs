@@ -27,10 +27,8 @@ public class BookingLock : IBookingLock
 
         try
         {
-            // UPDLOCK + HOLDLOCK: ai khóa trước thì giữ đến hết transaction,
-            // ai đến sau phải đợi ở dòng này rồi mới đi tiếp
             await _context.Database.ExecuteSqlInterpolatedAsync(
-                $"SELECT Id FROM Rooms WITH (UPDLOCK, HOLDLOCK) WHERE Id = {roomId}");
+                $"SELECT \"Id\" FROM \"Rooms\" WHERE \"Id\" = {roomId} FOR UPDATE");
 
             return tx;
         }
@@ -48,7 +46,7 @@ public class BookingLock : IBookingLock
         try
         {
             await _context.Database.ExecuteSqlInterpolatedAsync(
-                $"SELECT Id FROM Bookings WITH (UPDLOCK, HOLDLOCK) WHERE Id = {bookingId}");
+                $"SELECT \"Id\" FROM \"Bookings\" WHERE \"Id\" = {bookingId} FOR UPDATE");
 
             return tx;
         }
@@ -66,9 +64,9 @@ public class BookingLock : IBookingLock
         try
         {
             await _context.Database.ExecuteSqlInterpolatedAsync(
-                $"SELECT Id FROM Rooms WITH (UPDLOCK, HOLDLOCK) WHERE Id = {roomId}");
+                $"SELECT \"Id\" FROM \"Rooms\" WHERE \"Id\" = {roomId} FOR UPDATE");
             await _context.Database.ExecuteSqlInterpolatedAsync(
-                $"SELECT Id FROM Bookings WITH (UPDLOCK, HOLDLOCK) WHERE Id = {bookingId}");
+                $"SELECT \"Id\" FROM \"Bookings\" WHERE \"Id\" = {bookingId} FOR UPDATE");
 
             return tx;
         }

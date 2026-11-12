@@ -14,6 +14,6 @@ public class Coupon
     public int UsedCount { get; set; }
     public bool IsActive { get; set; } = true;
 
-    // Concurrency token: SQL Server tự đổi giá trị mỗi lần dòng này bị UPDATE
+    // Concurrency token được ứng dụng đổi mỗi lần cập nhật
     public byte[] RowVersion { get; set; } = Array.Empty<byte>();
 }

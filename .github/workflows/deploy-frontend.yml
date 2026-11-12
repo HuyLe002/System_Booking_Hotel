@@ -51,7 +51,8 @@ jobs:
       - name: Build frontend
         run: |
           if [ -z "$VITE_API_BASE_URL" ]; then
-            echo "::warning::VITE_API_BASE_URL repository variable is not configured. API-backed features will not work until it is set."
+            echo "::error::VITE_API_BASE_URL repository variable is not configured. Set it to the deployed API origin before deploying the frontend."
+            exit 1
           fi
           pnpm build
         working-directory: "HotelBookingAPI/Đặt phòng và quản lý khách sạn"
