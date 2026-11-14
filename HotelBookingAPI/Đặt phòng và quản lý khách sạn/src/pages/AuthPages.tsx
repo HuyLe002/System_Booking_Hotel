@@ -120,13 +120,21 @@ export function RegisterPage() {
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
-    const password = String(form.get("password"));
-    if (password !== form.get("confirmPassword")) return setError("Mật khẩu xác nhận chưa khớp.");
-    const payload = Object.fromEntries(
-      ["username", "password", "fullName", "email", "phone"].map((key) => [key, form.get(key)]),
-    );
-    setBusy(true);
     setError("");
+    const password = String(form.get("password"));
+    if (password !== form.get("confirmPassword"))
+      return setError("Mật khẩu xác nhận chưa khớp.");
+    const payload = {
+      username: String(form.get("username") ?? "").trim(),
+      password,
+      fullName: String(form.get("fullName") ?? "").trim(),
+      email: String(form.get("email") ?? "").trim(),
+      phone: String(form.get("phone") ?? "").trim(),
+    };
+    if (payload.username.length < 3)
+      return setError("Tên đăng nhập phải có ít nhất 3 ký tự sau khi bỏ khoảng trắng.");
+    if (!payload.fullName) return setError("Họ và tên không được để trống.");
+    setBusy(true);
     try {
       await api("/api/Auth/register", { method: "POST", body: JSON.stringify(payload) });
       notify("Đăng ký thành công. Vui lòng đăng nhập để tiếp tục.");
@@ -146,15 +154,57 @@ export function RegisterPage() {
         <Field
           name="fullName"
           label="Họ và tên"
+          autoComplete="name"
           required
+          maxLength={100}
           placeholder="Nguyễn Minh Anh"
           className="sm:col-span-2"
         />
-        <Field name="username" label="Tên đăng nhập" required />
-        <Field name="phone" label="Số điện thoại" type="tel" required />
-        <Field name="email" label="Email" type="email" required className="sm:col-span-2" />
-        <Field name="password" label="Mật khẩu" type="password" required minLength={6} />
-        <Field name="confirmPassword" label="Xác nhận mật khẩu" type="password" required />
+        <Field
+          name="username"
+          label="Tên đăng nhập"
+          autoComplete="username"
+          required
+          minLength={3}
+          maxLength={50}
+        />
+        <Field
+          name="phone"
+          label="Số điện thoại"
+          type="tel"
+          autoComplete="tel"
+          required
+          pattern="(0|\+84)[0-9]{9}"
+          title="Nhập số điện thoại dạng 0900000001 hoặc +84900000001."
+          placeholder="0900000001"
+        />
+        <Field
+          name="email"
+          label="Email"
+          type="email"
+          autoComplete="email"
+          required
+          maxLength={100}
+          className="sm:col-span-2"
+        />
+        <Field
+          name="password"
+          label="Mật khẩu"
+          type="password"
+          autoComplete="new-password"
+          required
+          minLength={6}
+          maxLength={100}
+        />
+        <Field
+          name="confirmPassword"
+          label="Xác nhận mật khẩu"
+          type="password"
+          autoComplete="new-password"
+          required
+          minLength={6}
+          maxLength={100}
+        />
         {error && (
           <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700 sm:col-span-2">
             {error}

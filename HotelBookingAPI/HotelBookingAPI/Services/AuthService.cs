@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 ﻿using HotelBookingAPI.Common;
 using HotelBookingAPI.DTOs;
 using HotelBookingAPI.Models;
@@ -22,7 +23,21 @@ public class AuthService : IAuthService
     public async Task<int> RegisterAsync(RegisterDto dto)
     {
         var username = dto.Username.Trim();
+        var fullName = dto.FullName.Trim();
         var email = dto.Email.Trim();
+        var phone = dto.Phone?.Trim();
+
+        if (username.Length is < 3 or > 50)
+            throw new ArgumentException("Tên đăng nhập từ 3 đến 50 ký tự");
+
+        if (string.IsNullOrWhiteSpace(fullName))
+            throw new ArgumentException("Họ tên là bắt buộc");
+
+        if (string.IsNullOrWhiteSpace(email))
+            throw new ArgumentException("Email là bắt buộc");
+
+        if (string.IsNullOrWhiteSpace(phone) || !Regex.IsMatch(phone, RegisterDto.PhonePattern))
+            throw new ArgumentException("Số điện thoại không hợp lệ (VD: 0900000001 hoặc +84900000001)");
 
         if (await _users.UsernameExistsAsync(username))
             throw new ArgumentException("Tên đăng nhập đã tồn tại");
@@ -37,9 +52,9 @@ public class AuthService : IAuthService
             Role = Roles.Customer,
             Customer = new Customer
             {
-                FullName = dto.FullName.Trim(),
+                FullName = fullName,
                 Email = email,
-                Phone = dto.Phone
+                Phone = phone
             }
         };
 

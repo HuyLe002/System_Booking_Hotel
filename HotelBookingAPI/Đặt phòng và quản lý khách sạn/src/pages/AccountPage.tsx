@@ -64,6 +64,7 @@ export function AccountLayout() {
 
 export function BookingsListPage() {
   const [page, setPage] = useState(1);
+  const { user } = useAuth();
   const result = useApiData(
     () =>
       api<Booking[]>(`/api/Bookings${queryString({ pageNumber: page, pageSize: 8 })}`).then((v) =>
@@ -73,11 +74,25 @@ export function BookingsListPage() {
   );
   return (
     <section>
+      <div className="mb-8 flex flex-col gap-5 rounded-3xl bg-navy p-6 text-white sm:flex-row sm:items-center sm:justify-between sm:p-8">
+        <div>
+          <p className="text-sm font-medium text-gold">KHÔNG GIAN CỦA BẠN</p>
+          <h1 className="mt-2 font-display text-3xl font-semibold">
+            Xin chào, {user?.fullName || user?.username || "bạn"}!
+          </h1>
+          <p className="mt-2 max-w-xl text-sm leading-6 text-white/70">
+            Theo dõi kỳ nghỉ, thanh toán và các dịch vụ đã chọn tại đây.
+          </p>
+        </div>
+        <Link to="/phong" className="shrink-0">
+          <Button variant="secondary">
+            <Plus size={17} />
+            Khám phá phòng
+          </Button>
+        </Link>
+      </div>
       <p className="eyebrow">Kỳ nghỉ của bạn</p>
-      <h1 className="section-title">Booking của tôi</h1>
-      <p className="mt-2 text-sm text-slate-500">
-        Theo dõi trạng thái, thanh toán và các dịch vụ đã chọn.
-      </p>
+      <h2 className="section-title">Booking của tôi</h2>
       {result.loading ? (
         <LoadingState />
       ) : result.error ? (

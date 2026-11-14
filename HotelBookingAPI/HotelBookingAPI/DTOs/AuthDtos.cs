@@ -4,6 +4,8 @@ namespace HotelBookingAPI.DTOs;
 
 public class RegisterDto
 {
+    public const string PhonePattern = @"^(0|\+84)\d{9}$";
+
     [Required(ErrorMessage = "Tên đăng nhập là bắt buộc")]
     [StringLength(50, MinimumLength = 3, ErrorMessage = "Tên đăng nhập từ 3 đến 50 ký tự")]
     public string Username { get; set; } = string.Empty;
@@ -21,8 +23,9 @@ public class RegisterDto
     [StringLength(100, ErrorMessage = "Email tối đa 100 ký tự")]
     public string Email { get; set; } = string.Empty;
 
-    [RegularExpression(@"^(0|\+84)\d{9}$", ErrorMessage = "Số điện thoại không hợp lệ (VD: 0900000001)")]
-    public string? Phone { get; set; }
+    [Required(ErrorMessage = "Số điện thoại là bắt buộc")]
+    [RegularExpression(PhonePattern, ErrorMessage = "Số điện thoại không hợp lệ (VD: 0900000001 hoặc +84900000001)")]
+    public string Phone { get; set; } = string.Empty;
 }
 
 public class LoginDto
