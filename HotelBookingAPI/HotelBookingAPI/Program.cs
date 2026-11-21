@@ -187,5 +187,17 @@ app.UseAuthentication(); // phải đứng trước UseAuthorization
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapGet("/health", () => Results.Ok(new
+{
+    status = "ok",
+    service = "HotelBookingAPI"
+}));
+app.MapGet("/health/ready", async (HotelDbContext db) =>
+{
+    var databaseAvailable = await db.Database.CanConnectAsync();
+    return databaseAvailable
+        ? Results.Ok(new { status = "ready", database = "connected" })
+        : Results.StatusCode(StatusCodes.Status503ServiceUnavailable);
+});
 
 app.Run();

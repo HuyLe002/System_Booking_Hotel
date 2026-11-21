@@ -21,9 +21,9 @@ Lần đầu triển khai, chọn GitHub Actions làm nguồn deploy trong Setti
 
 Đặt URL backend thực tế làm repository variable có tên `VITE_API_BASE_URL` trong
 GitHub (Settings → Secrets and variables → Actions → Variables). Không cần cung
-cấp giá trị này để build/deploy; nếu chưa đặt, ứng dụng vẫn chạy nhưng các chức
-năng cần API sẽ không hoạt động. Backend cũng phải cho phép origin Pages thực tế
-trong `Cors:AllowedOrigins`. Giá trị này được đóng gói công khai vào frontend;
+cấp giá trị này để build/deploy; workflow sẽ dừng trước khi deploy nếu chưa đặt.
+Backend cũng phải cho phép origin Pages thực tế trong `Cors:AllowedOrigins`.
+Giá trị này được đóng gói công khai vào frontend;
 chỉ dùng URL API công khai, không chứa thông tin xác thực. Không lưu JWT key,
 mật khẩu admin hay thông tin bí mật khác trong repository variable hoặc source
 code.
